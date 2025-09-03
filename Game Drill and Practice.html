@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drill and Practice Game - Multi Menu</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f0f4f8; }
+    .container { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    h1 { color: #2c3e50; }
+    .btn { display: block; margin: 10px auto; padding: 12px 15px; width: 80%; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; }
+    .btn:hover { background: #2980b9; }
+    .question { font-size: 20px; margin: 15px 0; font-weight: bold; }
+    .feedback { margin: 15px 0; font-weight: bold; }
+    .icon { font-size: 50px; margin: 15px 0; color: #34495e; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="home">
+      <h1>🎮 Drill and Practice</h1>
+      <button class="btn" onclick="startGame('biner')">🔢 Drill Biner</button>
+      <button class="btn" onclick="startGame('literasi')">📱 Literasi Digital</button>
+      <button class="btn" onclick="startGame('etika')">🤝 Etika Digital</button>
+    </div>
+
+    <div id="game" style="display:none;">
+      <div id="quiz"></div>
+      <div id="feedback" class="feedback"></div>
+      <button id="nextBtn" class="btn" style="display:none;">Soal Berikutnya ➡️</button>
+      <div id="score"></div>
+    </div>
+  </div>
+
+  <script>
+    const questions = {
+      biner: [
+        {question: "Konversikan 1101 biner ke desimal.", answers:["13","11","15","12"], correct:0, explanation:"1101 biner = 13 desimal."},
+        {question: "Konversikan 45 desimal ke biner.", answers:["101101","1011010","111001","1011011"], correct:0, explanation:"45 desimal = 101101 biner."},
+        {question: "Hasil penjumlahan biner 1011 + 110 = ?", answers:["10001","1111","1101","10101"], correct:0, explanation:"1011 (11) + 110 (6) = 10001 (17)."},
+        {question: "Jika 2^n = 32, maka n = ?", answers:["4","5","6","3"], correct:1, explanation:"2^5 = 32."},
+        {question: "Apa kelebihan sistem bilangan biner untuk komputer?", answers:["Lebih mudah direpresentasikan dengan transistor","Lebih hemat memori","Lebih cepat dibaca manusia","Tidak ada kelebihan"], correct:0, explanation:"Komputer menggunakan biner karena transistor hanya mengenal 0 dan 1."},
+        {question: "Hasil operasi logika AND antara 1010 dan 1100 adalah?", answers:["1000","1100","1010","1110"], correct:0, explanation:"1010 AND 1100 = 1000."},
+        {question: "Hasil operasi logika OR antara 1010 dan 1100 adalah?", answers:["1110","1100","1010","1000"], correct:0, explanation:"1010 OR 1100 = 1110."},
+        {question: "Konversi 3A (hexadesimal) ke biner.", answers:["111010","111100","101110","100110"], correct:0, explanation:"3A hex = 0011 1010 biner."},
+        {question: "Jika sebuah alamat IP ditulis dalam biner 11000000.10101000.00000001.00000001, alamat desimalnya adalah?", answers:["192.168.1.1","255.255.255.0","172.16.0.1","10.0.0.1"], correct:0, explanation:"11000000.10101000.00000001.00000001 = 192.168.1.1."},
+        {question: "Berapakah jumlah kombinasi unik dari 8 bit?", answers:["128","256","512","1024"], correct:1, explanation:"8 bit = 2^8 = 256 kemungkinan."}
+      ],
+      literasi: [
+        {question: "Mengapa penting memverifikasi informasi di internet?", answers:["Untuk memperkuat hoaks","Agar tidak mudah tertipu","Supaya viral","Mengisi waktu luang"], correct:1, explanation:"Verifikasi penting agar tidak termakan hoaks."},
+        {question: "Bagaimana cara mengecek kebenaran berita online?", answers:["Cek sumber resmi","Langsung share","Percaya karena banyak yang share","Ikuti perasaan"], correct:0, explanation:"Sumber resmi perlu dicek sebelum percaya."},
+        {question: "Apa resiko utama jika kita sembarangan membagikan data pribadi?", answers:["Identitas bisa dicuri","Akun jadi terkenal","Internet jadi cepat","Tidak ada resiko"], correct:0, explanation:"Data pribadi bisa digunakan untuk kejahatan (identity theft)."},
+        {question: "Contoh perilaku literasi digital yang baik adalah...", answers:["Membaca kritis sebelum share","Menghina orang di komentar","Klik semua iklan","Percaya semua pesan"], correct:0, explanation:"Membaca kritis sebelum share adalah literasi digital yang baik."},
+        {question: "Apa fungsi utama 2FA (Two Factor Authentication)?", answers:["Mempercepat login","Menambah keamanan akun","Membuat akun populer","Mengurangi memori"], correct:1, explanation:"2FA menambah lapisan keamanan akun."},
+        {question: "Seorang teman share informasi kesehatan tanpa sumber jelas, apa sikap terbaik?", answers:["Ikut share","Diam saja","Tanya sumbernya","Langsung percaya"], correct:2, explanation:"Minta sumber sebelum ikut menyebarkan."},
+        {question: "Apa tanda khas akun palsu di media sosial?", answers:["Foto profil aneh, sedikit postingan","Banyak teman asli","Sumber berita terpercaya","Aktif sejak lama"], correct:0, explanation:"Akun palsu biasanya minim postingan, profil mencurigakan."},
+        {question: "Mengapa hoaks cepat menyebar di internet?", answers:["Orang malas verifikasi","Sistem otomatis memblokir","Jarang ada yang membaca","Internet lambat"], correct:0, explanation:"Karena orang malas verifikasi, berita palsu cepat viral."},
+        {question: "Apa manfaat utama literasi digital bagi pelajar?", answers:["Bisa lebih kritis","Tambah pengikut","Lebih sering main game","Lebih mudah dibohongi"], correct:0, explanation:"Literasi digital membuat pelajar lebih kritis."},
+        {question: "Jika menemukan konten negatif di internet, apa yang bisa dilakukan?", answers:["Laporkan konten","Bagikan biar tahu","Diamkan saja","Komentari kasar"], correct:0, explanation:"Laporkan konten negatif agar ditindak."}
+      ],
+      etika: [
+        {question: "Apa arti etika digital?", answers:["Aturan sopan santun di dunia maya","Kode program komputer","Etika belajar offline","Bahasa pemrograman"], correct:0, explanation:"Etika digital = sopan santun dalam dunia maya."},
+        {question: "Mengapa cyberbullying berbahaya?", answers:["Menghibur orang","Bisa merusak mental korban","Meningkatkan popularitas","Tidak ada dampak"], correct:1, explanation:"Cyberbullying bisa menyebabkan trauma mental."},
+        {question: "Contoh perilaku etis saat berdiskusi online?", answers:["Menghargai pendapat berbeda","Mengejek lawan debat","Menggunakan kata kasar","Mengirim spam"], correct:0, explanation:"Etika digital mengharuskan kita menghargai perbedaan."},
+        {question: "Apa yang sebaiknya dilakukan sebelum mengunggah foto orang lain?", answers:["Langsung upload","Minta izin dulu","Edit tanpa izin","Share ke semua orang"], correct:1, explanation:"Selalu minta izin sebelum mengunggah foto orang lain."},
+        {question: "Jika ada perdebatan panas di grup, sikap etis adalah...", answers:["Ikut memanas-manasi","Diam atau menenangkan","Menyebarkan screenshot","Membalas dengan marah"], correct:1, explanation:"Etika digital: redam konflik, bukan memprovokasi."},
+        {question: "Mengapa penting menjaga jejak digital yang positif?", answers:["Agar citra baik terjaga","Supaya viral","Untuk menyebar kebencian","Tidak ada manfaat"], correct:0, explanation:"Jejak digital bisa memengaruhi masa depan (pekerjaan, reputasi)."},
+        {question: "Contoh pelanggaran hak cipta digital adalah...", answers:["Mengunduh musik ilegal","Membeli CD original","Membuat karya sendiri","Mengutip dengan sumber"], correct:0, explanation:"Mengunduh musik ilegal = melanggar hak cipta."},
+        {question: "Apa etika saat menggunakan sumber dari internet untuk tugas?", answers:["Tulis ulang tanpa sumber","Cantumkan sumber asli","Klaim karya sendiri","Sembunyikan link"], correct:1, explanation:"Cantumkan sumber asli untuk menghargai karya orang lain."},
+        {question: "Bagaimana sikap etis jika menerima pesan menghina?", answers:["Balas dengan hinaan","Laporkan & blokir","Sebarkan ke teman","Diam saja tapi kesal"], correct:1, explanation:"Laporkan dan blokir akun yang menghina."},
+        {question: "Mengapa penting menggunakan bahasa sopan di dunia maya?", answers:["Agar komunikasi lebih baik","Supaya banyak followers","Biar terlihat keren","Tidak penting"], correct:0, explanation:"Bahasa sopan = komunikasi sehat dan positif."}
+      ]
+    };
+
+    let currentCategory = "";
+    let currentQuestion = 0;
+    let score = 0;
+
+    function startGame(category){
+      currentCategory = category;
+      currentQuestion = 0;
+      score = 0;
+      document.getElementById("home").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      let q = questions[currentCategory][currentQuestion];
+      let quizDiv = document.getElementById("quiz");
+      let feedback = document.getElementById("feedback");
+      feedback.innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+
+      quizDiv.innerHTML = `<div class='question'>${q.question}</div>`;
+      q.answers.forEach((answer, i) => {
+        quizDiv.innerHTML += `<button class='btn' onclick='checkAnswer(${i})'>${answer}</button>`;
+      });
+    }
+
+    function checkAnswer(i) {
+      let q = questions[currentCategory][currentQuestion];
+      let feedback = document.getElementById("feedback");
+      if (i === q.correct) {
+        score++;
+        feedback.style.color = "green";
+        feedback.innerHTML = "✅ Benar! " + q.explanation;
+      } else {
+        feedback.style.color = "red";
+        feedback.innerHTML = "❌ Salah! " + q.explanation;
+      }
+      document.getElementById("nextBtn").style.display = "block";
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < questions[currentCategory].length) {
+        showQuestion();
+      } else {
+        endGame();
+      }
+    });
+
+    function endGame(){
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("feedback").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+      document.getElementById("score").innerHTML = `<h2>🎉 Skor Akhir: ${score} dari ${questions[currentCategory].length}</h2>`;
+
+      setTimeout(()=>{
+        document.getElementById("game").style.display = "none";
+        document.getElementById("home").style.display = "block";
+        document.getElementById("score").innerHTML = "";
+      }, 4000); // kembali ke home setelah 4 detik
+    }
+  </script>
+</body>
+</html>
